@@ -5,41 +5,38 @@ import sqlite3
 # Database class which will perform queries to manipulate sqlite3 database.
 class Database:
     def __init__(self, db):
-        self.conn = sqlite3.connect(db) # Creating a connection with a database as passed.
+        self.conn = sqlite3.connect(db)
         self.cur = self.conn.cursor()
-        # Using cursor to make a table of Mosques if it already doesn't exist.
         self.cur.execute("CREATE TABLE IF NOT EXISTS Mosques (id, name, type, address, cordinates, Imam_Name)")
-        self.conn.commit() # Commiting the changes to the database.
+        self.conn.commit() 
 
     def display(self):
-        # Using SELECT  query to get all the data from the database.
         self.cur.execute("SELECT * FROM Mosques")
-        rows = self.cur.fetchall() # fetchall for getting the database.
-        return rows # Returning the database.
+        rows = self.cur.fetchall()
+        return rows
 
+     # Inserting the data into the database with the entered data from the user using INSERT query.
     def insert (self,id, name, type,address,cor,I_name):
-        # Inserting the data into the database with the entered data from the user using INSERT query.
         self.cur.execute("INSERT INTO Mosques VALUES (?,?,?,?,?,?)",(id, name, type,address,cor,I_name))
-        self.conn.commit() # commiting the changes to the database.
-        messagebox.showinfo("Successful", "The data was inserted successfully") # Showing message to the screen.
-
+        self.conn.commit() 
+        messagebox.showinfo("Successful", "The data was inserted successfully")
+        
+       # Deleteing based on the id given by the user using DELETE  query.
     def delete(self,id):
-        # Deleteing based on the id given by the user using DELETE  query.
         self.cur.execute("DELETE FROM Mosques WHERE id=?",(id,))
         self.conn.commit()
-        messagebox.showinfo("Successful", "The data was deleted successfully")  #Showing delete message to the database.
-
+        messagebox.showinfo("Successful", "The data was deleted successfully")  
+       
+     # Updating the data based on the ID given using the UPDATE query. 
     def update(self, name,I_name):
-        # Updating the data based on the ID given using the UPDATE query. 
-            
         self.cur.execute("UPDATE Mosques SET Imam_Name=? WHERE name=?",(I_name, name))
         self.cur.execute("SELECT * FROM Mosques WHERE name=?", (name,))
         data = self.cur.fetchone()
         self.conn.commit()
         return data
 
+    # Searching the data based on the name.
     def search(self, name):
-        # Searching the data based on the name.
         self.cur.execute("SELECT * FROM Mosques WHERE name=?", (name,))
         data = self.cur.fetchone()
         return data
@@ -68,7 +65,6 @@ def populate_list():
 
 # For adding item, and calling the database to store data.
 def add_item():
-    # Checking if all inputs were given.
     if identry.get() == "" or nameentry.get() == "" or value_inside.get() == "Select type" or corentry.get() == "" or imamentry.get() == "":
         messagebox.showerror("All Inputs required!", "Please input all the entries.")
         return
@@ -81,14 +77,12 @@ def add_item():
             return
     listbox.delete(0, END)
     
-    # Calling the insert function of the database.
     db.insert(identry.get(),nameentry.get(), value_inside.get(), addresentry.get(), corentry.get(), imamentry.get())
     clear_all()
     populate_list()
 
 
 def remove_item():
-    # Checking if the database is empty.
     if len(db.display()) == 0:
         messagebox.showerror("No Data", "No data available in the database.")
         return
@@ -102,7 +96,6 @@ def remove_item():
     clear_all()
 
 def update_item():
-    # Checking if the database is empty.
     if len(db.display()) == 0:
         messagebox.showerror("No Data", "No data available in the database.")
         return
@@ -135,72 +128,64 @@ def search_by_name():
     clear_all()
     listbox.insert(END, f"{data[0]}, {data[1]}, {data[2]}, {data[3]}, {data[4]}, {data[5]}")
 
-# Creating a dtabase object, which will contain the table of Mosques to store the data.
 db = Database('store.db')
 
-#create window object
 app = Tk()
-app.title('Mosques Management System') # Setting the title of the screen.
-app.geometry('900x350') # Setting the size of the screen, width and height.
+app.title('Mosques Management System')
+app.geometry('900x350') 
 
-idlable = StringVar() # StringVar for Entry variable for ID.
-idlable1 =Label(app, text='ID',font=('bold',14),pady=20) # Label saying 'ID'
+idlable = StringVar() 
+idlable1 =Label(app, text='ID',font=('bold',14),pady=20)
 idlable1.grid(row=0,column=0,sticky=W)
-identry =Entry(app,textvariable=idlable) # Assigning the StringVar to our ID Entry variable.
+identry =Entry(app,textvariable=idlable) 
 identry.grid(row=0,column=1)
 
-namelable = StringVar() # StringVar for Entry Variable for Name.
+namelable = StringVar() 
 namelable1 =Label(app, text='Name',font=('bold',14) ,pady=20)
 namelable1.grid(row=0,column=2,sticky=W)
-nameentry =Entry(app,textvariable=namelable) # Assigning the StringVar for name entry.
+nameentry =Entry(app,textvariable=namelable)
 nameentry.grid(row=0,column=3)
 
 typelable = StringVar()
 typelable =Label(app, text='Type',font=('bold',14) ,pady=20)
 typelable.grid(row=1,column=0,sticky=W)
-options_list = ["Type 1", "Type 2", "Type 3", "Type 4"] # Assigning options for the type list
+options_list = ["Type 1", "Type 2", "Type 3", "Type 4"] 
 
-# Variable to keep track of the option
-# selected in OptionMenu
 value_inside =StringVar(app) 
 
-# Set the default value of the variable
 value_inside.set("Select type")
 
-# Create the optionmenu widget and passing
-# the options_list and value_inside to it.
-question_menu = OptionMenu(app, value_inside, *options_list) # Creating a question menu. Assigning the StringVar to store user input and the options list that we defined above.
+question_menu = OptionMenu(app, value_inside, *options_list)
 question_menu.grid(row=1,column=1,sticky=W)
 
 
-addreslable = StringVar() # The stringVar for Address Entry
+addreslable = StringVar()
 addreslable1 =Label(app, text='Address',font=('bold',14) ,pady=20)
 addreslable1.grid(row=1,column=2,sticky=W)
-addresentry =Entry(app,textvariable=addreslable)# Assigning the StringVar for addresss entry.
+addresentry =Entry(app,textvariable=addreslable)
 addresentry.grid(row=1,column=3)
 
 corlable = StringVar()
 corlable1 =Label(app, text='Coordinates',font=('bold',14) ,pady=20)
 corlable1.grid(row=3,column=0,sticky=W)
-corentry =Entry(app,textvariable=corlable)# Assigning the StringVar for coordinate entry.
+corentry =Entry(app,textvariable=corlable)
 corentry.grid(row=3,column=1)
 
 
 imamlable = StringVar()
 imamlable1 =Label(app, text='Imam_Name',font=('bold',14) ,pady=20)
 imamlable1.grid(row=3,column=2,sticky=W)
-imamentry =Entry(app,textvariable=imamlable)# Assigning the StringVar for Imam entry.
+imamentry =Entry(app,textvariable=imamlable)
 imamentry.grid(row=3,column=3)
 
-listbox =Listbox(app,height=20,width=65) # Defining a listbox to show the data stored in our db.
+listbox =Listbox(app,height=20,width=65) 
 listbox.grid(row=0,column=4,columnspan=4,rowspan=6,padx=20)
-#scrollbar
-scrollbar = Scrollbar(app,orient='vertical',command=listbox.yview) # Making a scrollbar 
+
+scrollbar = Scrollbar(app,orient='vertical',command=listbox.yview)
 scrollbar.grid(row=0,column=7, rowspan=6, sticky='nse')
-listbox['yscrollcommand'] = scrollbar.set # Assigning the yscrollcommand of listbox to the scrollbar.
+listbox['yscrollcommand'] = scrollbar.set 
 
 
-# Making buttons for add, update, delete, search_by_name and display.
 add_btn = Button(app,text='Add Entry',width=12, bg="#89f589", command=add_item)
 add_btn.grid(row=4,column=0)
 
